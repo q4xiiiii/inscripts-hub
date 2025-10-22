@@ -1,13 +1,8 @@
--- Inscripts Hub con UI estilo Inscript (Switches modernos)
--- Servicios
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
 local player = Players.LocalPlayer
 
--- Estado y datos globales
 local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
 player.CharacterAdded:Connect(function(char)
     humanoid = char:WaitForChild("Humanoid")
@@ -30,13 +25,11 @@ local timeBaseData = {
     PLOTS_FOLDER = nil
 }
 
--- Colores Float
 local floatColorMode = "RGB"
 local floatFixedColor = Color3.fromRGB(70,130,180)
 local floatGradientColor1 = Color3.fromRGB(70,130,180)
 local floatGradientColor2 = Color3.fromRGB(138,43,226)
 
--- GUI principal (usar PlayerGui para mayor compatibilidad)
 local playerGui = player:WaitForChild("PlayerGui")
 local gui = Instance.new("ScreenGui")
 gui.Name = "InscriptsHubUI"
@@ -44,183 +37,34 @@ gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = playerGui
 
--- -----------------------
--- 📢 Comunicado inicial
--- -----------------------
-local comunicadoFrame = Instance.new("Frame")
-comunicadoFrame.Size = UDim2.new(0,320,0,180)
-comunicadoFrame.Position = UDim2.new(0.5,-160,0.5,-90)
-comunicadoFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-comunicadoFrame.Active = true
-comunicadoFrame.Draggable = true
-comunicadoFrame.Parent = gui
-local comunicadoCorner = Instance.new("UICorner")
-comunicadoCorner.CornerRadius = UDim.new(0,12)
-comunicadoCorner.Parent = comunicadoFrame
+local notificationFrame = Instance.new("Frame")
+notificationFrame.Size = UDim2.new(0,300,0,80)
+notificationFrame.Position = UDim2.new(1,10,0,10)
+notificationFrame.AnchorPoint = Vector2.new(1,0)
+notificationFrame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+notificationFrame.Parent = gui
+local notificationCorner = Instance.new("UICorner")
+notificationCorner.CornerRadius = UDim.new(0,8)
+notificationCorner.Parent = notificationFrame
 
-local comunicadoTitulo = Instance.new("TextLabel")
-comunicadoTitulo.Text = "hi"
-comunicadoTitulo.Size = UDim2.new(1,0,0,35)
-comunicadoTitulo.BackgroundTransparency = 1
-comunicadoTitulo.Font = Enum.Font.GothamBold
-comunicadoTitulo.TextColor3 = Color3.fromRGB(255,255,255)
-comunicadoTitulo.TextSize = 18
-comunicadoTitulo.Parent = comunicadoFrame
+local notificationText = Instance.new("TextLabel")
+notificationText.Text = "Inscripts Hub\nScript carregado com sucesso!"
+notificationText.Size = UDim2.new(1,-10,1,-10)
+notificationText.Position = UDim2.new(0,5,0,5)
+notificationText.BackgroundTransparency = 1
+notificationText.Font = Enum.Font.GothamBold
+notificationText.TextColor3 = Color3.fromRGB(255,255,255)
+notificationText.TextSize = 14
+notificationText.TextWrapped = true
+notificationText.TextYAlignment = Enum.TextYAlignment.Top
+notificationText.Parent = notificationFrame
 
-local comunicadoTexto = Instance.new("TextLabel")
-comunicadoTexto.Text = "I invite you to my Discord community,\nthere we updated everything.\n\n What are you waiting for to come in?"
-comunicadoTexto.Size = UDim2.new(1,-20,0,80)
-comunicadoTexto.Position = UDim2.new(0,10,0,45)
-comunicadoTexto.BackgroundTransparency = 1
-comunicadoTexto.Font = Enum.Font.Gotham
-comunicadoTexto.TextWrapped = true
-comunicadoTexto.TextYAlignment = Enum.TextYAlignment.Top
-comunicadoTexto.TextColor3 = Color3.fromRGB(200,200,200)
-comunicadoTexto.TextSize = 14
-comunicadoTexto.Parent = comunicadoFrame
-
-local discordBtn = Instance.new("TextButton")
-discordBtn.Text = "Unirme al Discord"
-discordBtn.Size = UDim2.new(0.7,0,0,35)
-discordBtn.Position = UDim2.new(0.15,0,0,135)
-discordBtn.BackgroundColor3 = Color3.fromRGB(70,130,180)
-discordBtn.TextColor3 = Color3.fromRGB(255,255,255)
-discordBtn.Font = Enum.Font.GothamBold
-discordBtn.TextSize = 14
-discordBtn.Parent = comunicadoFrame
-local discordCorner = Instance.new("UICorner")
-discordCorner.CornerRadius = UDim.new(0,8)
-discordCorner.Parent = discordBtn
-
-discordBtn.MouseButton1Click:Connect(function()
-    pcall(function() setclipboard("https://discord.gg/inscripts") end)
-    discordBtn.Text = "Copiado!"
-    task.delay(2, function() if discordBtn and discordBtn.Parent then discordBtn.Text = "Unirme al Discord" end end)
-end)
-
-local cerrarBtn = Instance.new("TextButton")
-cerrarBtn.Text = "Cerrar"
-cerrarBtn.Size = UDim2.new(0.25,0,0,25)
-cerrarBtn.Position = UDim2.new(0.72,0,0,5)
-cerrarBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
-cerrarBtn.TextColor3 = Color3.fromRGB(255,255,255)
-cerrarBtn.Font = Enum.Font.GothamBold
-cerrarBtn.TextSize = 12
-cerrarBtn.Parent = comunicadoFrame
-local cerrarCorner = Instance.new("UICorner")
-cerrarCorner.CornerRadius = UDim.new(0,6)
-cerrarCorner.Parent = cerrarBtn
-
--- -----------------------
--- 🔑 Pantalla Key (se oculta hasta que pase el comunicado)
--- -----------------------
-local keyFrame = Instance.new("Frame")
-keyFrame.Size = UDim2.new(0,280,0,140)
-keyFrame.Position = UDim2.new(0.5,-140,0.5,-70)
-keyFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-keyFrame.Active = true
-keyFrame.Draggable = true
-keyFrame.Parent = gui
-local keyCorner = Instance.new("UICorner")
-keyCorner.CornerRadius = UDim.new(0,12)
-keyCorner.Parent = keyFrame
-keyFrame.Visible = false -- hide until comunicado closes
-
-local keyTitle = Instance.new("TextLabel")
-keyTitle.Text = " Ingresa tu Key"
-keyTitle.Size = UDim2.new(1,0,0,35)
-keyTitle.BackgroundTransparency = 1
-keyTitle.Font = Enum.Font.GothamBold
-keyTitle.TextColor3 = Color3.fromRGB(255,255,255)
-keyTitle.TextSize = 18
-keyTitle.Parent = keyFrame
-
-local keyBox = Instance.new("TextBox")
-keyBox.PlaceholderText = "Escribe la key..."
-keyBox.Size = UDim2.new(1,-40,0,30)
-keyBox.Position = UDim2.new(0,20,0,50)
-keyBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
-keyBox.TextColor3 = Color3.fromRGB(255,255,255)
-keyBox.TextSize = 14
-keyBox.Font = Enum.Font.Gotham
-keyBox.Parent = keyFrame
-
-local keyBtn = Instance.new("TextButton")
-keyBtn.Text = "Confirmar"
-keyBtn.Size = UDim2.new(0.6,0,0,30)
-keyBtn.Position = UDim2.new(0.2,0,0,90)
-keyBtn.BackgroundColor3 = Color3.fromRGB(70,130,180)
-keyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-keyBtn.TextSize = 14
-keyBtn.Font = Enum.Font.GothamBold
-keyBtn.Parent = keyFrame
-local keyCornerBtn = Instance.new("UICorner")
-keyCornerBtn.CornerRadius = UDim.new(0,8)
-keyCornerBtn.Parent = keyBtn
-
--- -----------------------
--- ⏳ Auto cerrar comunicado y mostrar key (5 seconds)
--- -----------------------
 task.delay(5, function()
-    if comunicadoFrame and comunicadoFrame.Parent then
-        pcall(function() comunicadoFrame:Destroy() end)
-    end
-    if keyFrame then
-        keyFrame.Visible = true
+    if notificationFrame and notificationFrame.Parent then
+        notificationFrame:Destroy()
     end
 end)
 
--- Also allow manual close
-cerrarBtn.MouseButton1Click:Connect(function()
-    if comunicadoFrame and comunicadoFrame.Parent then
-        comunicadoFrame:Destroy()
-    end
-    keyFrame.Visible = true
-end)
-
--- -----------------------
--- Pantalla de carga
--- -----------------------
-local loadingFrame = Instance.new("Frame")
-loadingFrame.Size = UDim2.new(0,300,0,150)
-loadingFrame.Position = UDim2.new(0.5,-150,0.5,-75)
-loadingFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-loadingFrame.Visible = false
-loadingFrame.Parent = gui
-local loadCorner = Instance.new("UICorner")
-loadCorner.CornerRadius = UDim.new(0,12)
-loadCorner.Parent = loadingFrame
-
-local loadLabel = Instance.new("TextLabel")
-loadLabel.Text = "Cargando..."
-loadLabel.Size = UDim2.new(1,0,0,50)
-loadLabel.Position = UDim2.new(0,0,0,20)
-loadLabel.BackgroundTransparency = 1
-loadLabel.Font = Enum.Font.GothamBold
-loadLabel.TextColor3 = Color3.fromRGB(255,255,255)
-loadLabel.TextSize = 22
-loadLabel.Parent = loadingFrame
-
-local barBack = Instance.new("Frame")
-barBack.Size = UDim2.new(0.8,0,0,20)
-barBack.Position = UDim2.new(0.1,0,0,100)
-barBack.BackgroundColor3 = Color3.fromRGB(50,50,50)
-barBack.Parent = loadingFrame
-local barCorner = Instance.new("UICorner")
-barCorner.CornerRadius = UDim.new(0,8)
-barCorner.Parent = barBack
-
-local barFill = Instance.new("Frame")
-barFill.Size = UDim2.new(0,0,1,0)
-barFill.BackgroundColor3 = Color3.fromRGB(70,130,180)
-barFill.Parent = barBack
-local barFillCorner = Instance.new("UICorner")
-barFillCorner.CornerRadius = UDim.new(0,8)
-barFillCorner.Parent = barFill
-
--- -----------------------
--- Panel flotante y menu (botón y panel principal)
--- -----------------------
 local mainBtn = Instance.new("TextButton")
 mainBtn.Size = UDim2.new(0,140,0,35)
 mainBtn.Position = UDim2.new(0.05,0,0.2,0)
@@ -231,7 +75,6 @@ mainBtn.TextSize = 14
 mainBtn.Font = Enum.Font.GothamBold
 mainBtn.Active = true
 mainBtn.Draggable = true
-mainBtn.Visible = false
 mainBtn.Parent = gui
 local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0,10)
@@ -269,7 +112,6 @@ task.spawn(function()
     end
 end)
 
--- Botones de sección
 local generalBtn = Instance.new("TextButton")
 generalBtn.Text = "General"
 generalBtn.Size = UDim2.new(0.5,-2,0,25)
@@ -296,7 +138,6 @@ local infoCorner = Instance.new("UICorner")
 infoCorner.CornerRadius = UDim.new(0,6)
 infoCorner.Parent = infoBtn
 
--- Contenedor
 local generalFrame = Instance.new("ScrollingFrame")
 generalFrame.Size = UDim2.new(1,-10,1,-65)
 generalFrame.Position = UDim2.new(0,5,0,65)
@@ -321,7 +162,7 @@ infoCornerFrame.CornerRadius = UDim.new(0,6)
 infoCornerFrame.Parent = infoFrame
 
 local infoText = Instance.new("TextLabel")
-infoText.Text = "Inscripts Hub\n Version: 1.0\ns"
+infoText.Text = "Inscripts Hub\nVersion: 1.0\nIKTOK: @inscripts\nESP BEST\nESP BASE\nESP PLAYER\nAUTO LASER\nX-RAY\nANTI SENTRY\nDISCORD"
 infoText.Size = UDim2.new(1,-10,1,-10)
 infoText.Position = UDim2.new(0,5,0,5)
 infoText.BackgroundTransparency = 1
@@ -332,7 +173,6 @@ infoText.TextWrapped = true
 infoText.TextYAlignment = Enum.TextYAlignment.Top
 infoText.Parent = infoFrame
 
--- Conexión pestañas
 generalBtn.MouseButton1Click:Connect(function()
     generalFrame.Visible = true
     infoFrame.Visible = false
@@ -346,7 +186,6 @@ infoBtn.MouseButton1Click:Connect(function()
     generalBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
 end)
 
--- Función para crear switch (estilo Inscript moderno)
 local function createSwitch(name, parent, callback)
     local option = Instance.new("Frame")
     option.Size = UDim2.new(1, 0, 0, 40)
@@ -400,9 +239,6 @@ local function createSwitch(name, parent, callback)
     end)
 end
 
--- -----------------------
--- Funciones auxiliares (Float button, etc)
--- -----------------------
 local function createFloatButton()
     if floatGuiBtn then return end
     floatGuiBtn = Instance.new("TextButton")
@@ -464,7 +300,6 @@ local function createFloatButton()
     end)
 end
 
--- Loop de float que mantiene la plataforma debajo del jugador y aplica color dinámico
 task.spawn(function()
     while task.wait(0.05) do
         if floatEnabled then
@@ -499,11 +334,6 @@ task.spawn(function()
     end
 end)
 
--- -----------------------
--- Hacks (ahora con switches)
--- -----------------------
-
--- Speed
 createSwitch("Speed", generalFrame, function(state)
     speedEnabled = state
     if state then
@@ -518,7 +348,6 @@ createSwitch("Speed", generalFrame, function(state)
     end
 end)
 
--- High Jump
 local function highJumpInput(input, gameProcessed)
     if gameProcessed then return end
     if not jumpEnabled then return end
@@ -534,11 +363,10 @@ createSwitch("High Jump", generalFrame, function(state)
     jumpEnabled = state
 end)
 
--- Float (con botón flotante)
 createSwitch("Float", generalFrame, function(state)
     if state then
         createFloatButton()
-        floatEnabled = false -- el Usuario debe activar con el floatGuiBtn
+        floatEnabled = false
     else
         floatEnabled = false
         if floatGuiBtn then pcall(function() floatGuiBtn:Destroy() end) floatGuiBtn = nil end
@@ -546,7 +374,6 @@ createSwitch("Float", generalFrame, function(state)
     end
 end)
 
--- FPS Booting con AntiLag
 createSwitch("FPS Booting", generalFrame, function(state)
     if state then
         if setfpscap then pcall(function() setfpscap(360) end) end
@@ -579,7 +406,6 @@ createSwitch("FPS Booting", generalFrame, function(state)
     end
 end)
 
--- ESP Players (RGB)
 createSwitch("ESP Players", generalFrame, function(state)
     espEnabled = state
     if state then
@@ -621,10 +447,8 @@ createSwitch("ESP Players", generalFrame, function(state)
                                 end
                             end)
                             if not success then
-                                -- ignore errors
                             end
                         else
-                            -- update color
                             for _,desc in pairs(plr.Character.ESP:GetChildren()) do
                                 if desc:IsA("TextLabel") then
                                     desc.TextColor3=Color3.fromHSV(tick()%5/5,1,1)
@@ -635,12 +459,10 @@ createSwitch("ESP Players", generalFrame, function(state)
                 end
                 task.wait(0.2)
             end
-            -- cleanup on disable
             for _,plr in pairs(Players:GetPlayers()) do
                 if plr.Character and plr.Character:FindFirstChild("ESP") then
                     pcall(function() plr.Character.ESP:Destroy() end)
                 end
-                -- also remove BoxHandleAdornment if present
                 if plr.Character then
                     for _,d in pairs(plr.Character:GetDescendants()) do
                         if d:IsA("BoxHandleAdornment") then
@@ -653,7 +475,6 @@ createSwitch("ESP Players", generalFrame, function(state)
     end
 end)
 
--- ✅ Time Base (plots) - toma la lógica completa del script Time Base
 createSwitch("Time Base", generalFrame, function(state)
     timeBaseEnabled = state
 
@@ -801,9 +622,6 @@ createSwitch("Time Base", generalFrame, function(state)
     end)
 end)
 
--- ============================
--- ESP BREINROT (Jugadores + Bosses con distancia) --> SOLO BOSSES (RGB + Distancia)
--- ============================
 do
     local breinrotEnabled = false
     local bossesTracked = {}
@@ -968,7 +786,6 @@ do
     end)
 end
 
--- ✅ Serverhop directo (al activar, te cambia de servidor)
 createSwitch("Serverhop", generalFrame, function(state)
     if state then
         local placeId = game.PlaceId
@@ -976,32 +793,10 @@ createSwitch("Serverhop", generalFrame, function(state)
     end
 end)
 
--- -----------------------
--- KeyCheck (fix duplicado)
-local KEY="keygratis1"
-keyBtn.MouseButton1Click:Connect(function()
-    if keyBox.Text == KEY then
-        pcall(function() keyFrame:Destroy() end) -- 🔹 destruir en vez de ocultar
-        loadingFrame.Visible = true
-        for i=1,100 do
-            barFill.Size = UDim2.new(i/100,0,1,0)
-            task.wait(0.03)
-        end
-        loadingFrame.Visible = false
-        mainBtn.Visible = true
-    else
-        keyBox.Text = ""
-        keyBox.PlaceholderText = "❌ Key incorrecta"
-    end
-end)
-
-
--- Panel toggle
 mainBtn.MouseButton1Click:Connect(function()
     frame.Visible = not frame.Visible
 end)
 
--- Toggle con tecla Insert
 UserInputService.InputBegan:Connect(function(input, gp)
     if not gp and input.KeyCode == Enum.KeyCode.Insert then
         frame.Visible = not frame.Visible
